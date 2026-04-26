@@ -1,6 +1,11 @@
 require "kemal"
 require "json"
 require "socket"
+require "crypto/bcrypt/password"
+require "random/secure"
+
+# Auth state
+ACTIVE_SESSIONS = [] of String
 
 # Setup logging
 log_file = File.new("logs/app.log", "a")
@@ -50,7 +55,7 @@ before_all do |env|
   path = env.request.path
   if path != "/login" && path != "/style.css" && path != "/app.js" && path != "/favicon.ico"
     cookie = env.request.cookies["auth"]?
-    if cookie.nil? || cookie.value != "supersecrettoken"
+    if cookie.nil? || !ACTIVE_SESSIONS.includes?(cookie.value)
       if path == "/live"
         halt env, 403, "Forbidden"
       else
@@ -70,8 +75,22 @@ post "/login" do |env|
   username = env.params.body["username"]?
   password = env.params.body["password"]?
   
-  if username == "admin" && password == "CrystalLogs2026"
-    env.response.cookies << HTTP::Cookie.new("auth", "supersecrettoken", path: "/", http_only: true)
+  admin_user = ENV.fetch("ADMIN_USER", "admin")
+  admin_hash = ENV.fetch("ADMIN_PASS_HASH", "$2a$11$rVzJPSs3XWh//LqvbdmWYOAguarKrKXkHEPd8guIxucwyijA3C2mu")
+  
+  is_valid = false
+  if username == admin_user && password
+    begin
+      is_valid = Crypto::Bcrypt::Password.new(admin_hash) == password
+    rescue
+      is_valid = false
+    end
+  end
+  
+  if is_valid
+    session_token = Random::Secure.hex(32)
+    ACTIVE_SESSIONS << session_token
+    env.response.cookies << HTTP::Cookie.new("auth", session_token, path: "/", http_only: true, secure: true)
     env.redirect "/"
   else
     env.response.content_type = "text/html"
@@ -80,7 +99,10 @@ post "/login" do |env|
 end
 
 get "/logout" do |env|
-  env.response.cookies << HTTP::Cookie.new("auth", "", path: "/", http_only: true, expires: Time.utc(1970, 1, 1))
+  if cookie = env.request.cookies["auth"]?
+    ACTIVE_SESSIONS.delete(cookie.value)
+  end
+  env.response.cookies << HTTP::Cookie.new("auth", "", path: "/", http_only: true, secure: true, expires: Time.utc(1970, 1, 1))
   env.redirect "/login"
 end
 
