@@ -151,7 +151,7 @@ function addErrorLog(msg) {
   }
 }
 
-function updateTopList(counts, element, limit = 5) {
+function updateTopList(counts, element, limit = 20) {
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, limit);
   element.innerHTML = '';
   sorted.forEach(([key, val]) => {

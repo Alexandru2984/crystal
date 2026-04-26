@@ -57,10 +57,10 @@ before_all do |env|
     cookie = env.request.cookies["auth"]?
     if cookie.nil? || !ACTIVE_SESSIONS.includes?(cookie.value)
       if path == "/live"
-        halt env, 403, "Forbidden"
+        halt env, status_code: 403, response: "Forbidden"
       else
         env.redirect "/login"
-        halt env, 403, "Forbidden"
+        halt env, status_code: 302, response: ""
       end
     end
   end
@@ -74,25 +74,19 @@ end
 post "/login" do |env|
   username = env.params.body["username"]?
   password = env.params.body["password"]?
-  
-  admin_user = ENV.fetch("ADMIN_USER", "admin")
-  admin_hash = ENV.fetch("ADMIN_PASS_HASH", "$2a$11$rVzJPSs3XWh//LqvbdmWYOAguarKrKXkHEPd8guIxucwyijA3C2mu")
-  
-  is_valid = false
-  if username == admin_user && password
-    begin
-      is_valid = Crypto::Bcrypt::Password.new(admin_hash) == password
-    rescue
-      is_valid = false
-    end
-  end
-  
-  if is_valid
+
+  app_log "Login attempt - User: #{username}, Pass provided: #{!password.nil?}"
+
+  # Folosim direct valorile din cod pentru test, sa eliminam variabilele de mediu ca sursa de eroare
+  if username == "admin" && password == "CrystalLogs2026"
     session_token = Random::Secure.hex(32)
     ACTIVE_SESSIONS << session_token
-    env.response.cookies << HTTP::Cookie.new("auth", session_token, path: "/", http_only: true, secure: true, extension: "SameSite=Strict")
+    # Punem secure: false si scoatem SameSite momentan pentru test
+    env.response.cookies << HTTP::Cookie.new("auth", session_token, path: "/", http_only: true)
+    app_log "Login success for admin. Token generated."
     env.redirect "/"
   else
+    app_log "Login failed for user: #{username}"
     env.response.content_type = "text/html"
     File.read("./src/login.html").sub(%{<div class="error-msg" id="error-msg">}, %{<div class="error-msg" id="error-msg" style="display:block;">})
   end
