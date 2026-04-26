@@ -1,0 +1,6 @@
+name: traffic_analyzer
+version: 0.1.0
+
+dependencies:
+  kemal:
+    github: kemalcr/kemal

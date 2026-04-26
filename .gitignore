@@ -1,0 +1,11 @@
+logs/
+data/
+*.log
+*.pid
+*.tmp
+build/
+lib/
+bin/
+shard.lock
+.env
+.DS_Store

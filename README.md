@@ -4,9 +4,11 @@ A real-time traffic dashboard for Nginx logs, built with Crystal and WebSockets.
 
 ## Features
 - Real-time Nginx access and error log tailing.
+- **Historical Data:** Automatically loads the last 200 access logs and 20 error logs upon connection.
 - WebSocket-based streaming to a beautiful web dashboard.
 - Live analytics: Requests per second, status codes, top IPs, and top endpoints.
 - Error spike detection.
+- **Secure Access:** Integrated Crystal-based login system with session cookies (HTTP Only).
 - Dynamic port allocation to avoid conflicts.
 
 ## Setup Instructions

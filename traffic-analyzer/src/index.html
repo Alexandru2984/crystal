@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Traffic Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Traffic Analyzer</h1>
+      <div class="status">
+        <span id="connection-status" class="indicator disconnected"></span>
+        <span id="connection-text">Disconnected</span>
+        <a href="/logout" style="color: var(--accent-color); margin-left: 15px; text-decoration: none; font-size: 0.9em; border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 4px; transition: background 0.2s;">Logout</a>
+      </div>
+    </header>
+
+    <div class="metrics">
+      <div class="card">
+        <h3>Requests / sec</h3>
+        <div class="value" id="rps-counter">0</div>
+      </div>
+      <div class="card">
+        <h3>Total Requests</h3>
+        <div class="value" id="total-requests">0</div>
+      </div>
+      <div class="card error-card">
+        <h3>Total Errors (4xx/5xx)</h3>
+        <div class="value" id="total-errors">0</div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="card chart-container">
+        <h3>Status Codes</h3>
+        <canvas id="statusChart"></canvas>
+      </div>
+      <div class="card chart-container">
+        <h3>Live Traffic</h3>
+        <canvas id="trafficChart"></canvas>
+      </div>
+    </div>
+
+    <div class="lists">
+      <div class="card list-card">
+        <h3>Top IPs</h3>
+        <ul id="top-ips"></ul>
+      </div>
+      <div class="card list-card">
+        <h3>Top Endpoints</h3>
+        <ul id="top-endpoints"></ul>
+      </div>
+      <div class="card list-card error-logs">
+        <h3>Recent Errors</h3>
+        <ul id="error-logs"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
