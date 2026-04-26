@@ -90,7 +90,7 @@ post "/login" do |env|
   if is_valid
     session_token = Random::Secure.hex(32)
     ACTIVE_SESSIONS << session_token
-    env.response.cookies << HTTP::Cookie.new("auth", session_token, path: "/", http_only: true, secure: true)
+    env.response.cookies << HTTP::Cookie.new("auth", session_token, path: "/", http_only: true, secure: true, extension: "SameSite=Strict")
     env.redirect "/"
   else
     env.response.content_type = "text/html"
@@ -102,7 +102,7 @@ get "/logout" do |env|
   if cookie = env.request.cookies["auth"]?
     ACTIVE_SESSIONS.delete(cookie.value)
   end
-  env.response.cookies << HTTP::Cookie.new("auth", "", path: "/", http_only: true, secure: true, expires: Time.utc(1970, 1, 1))
+  env.response.cookies << HTTP::Cookie.new("auth", "", path: "/", http_only: true, secure: true, extension: "SameSite=Strict", expires: Time.utc(1970, 1, 1))
   env.redirect "/login"
 end
 
